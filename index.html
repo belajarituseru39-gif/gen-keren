@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEN KEREN - Administrasi Pembelajaran Otomatis | Abdul Rahmat, S.Pd</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Subtle Animations & Scrollbar */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: floatSlow 5s ease-in-out infinite;
+        }
+        .card-hover {
+            transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-6px);
+        }
+        /* Custom glass effect */
+        .glass-header {
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 font-sans antialiased selection:bg-brand-600 selection:text-white transition-colors duration-300">
+
+    <!-- Toast Notification Container (Replaces alert) -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Modal Detail Aplikasi -->
+    <div id="appModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-200">
+        <div id="appModalContent" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl transform scale-95 transition-transform duration-200">
+            <div class="flex items-start justify-between gap-4 mb-5">
+                <div class="flex items-center gap-3.5">
+                    <div id="modalIconBox" class="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl shadow-md">
+                        <i id="modalIcon" class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <span id="modalCategory" class="text-xs font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-700 dark:bg-brand-900/50 dark:text-brand-300">Kategori</span>
+                        <h3 id="modalTitle" class="text-xl font-bold font-display text-slate-900 dark:text-white mt-1">Nama Generator</h3>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="Tutup modal">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <p id="modalDesc" class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-5"></p>
+
+            <div class="bg-slate-50 dark:bg-slate-800/70 rounded-2xl p-4 mb-6 border border-slate-200/70 dark:border-slate-700/60">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5 flex items-center gap-1.5">
+                    <i class="fa-solid fa-list-check text-brand-500"></i> Manfaat & Fitur Utama
+                </h4>
+                <ul id="modalFeatures" class="space-y-2 text-sm text-slate-700 dark:text-slate-300"></ul>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <a id="modalOpenBtn" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-lg shadow-brand-500/25 transition">
+                    <span>Buka Generator Sekarang</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                </a>
+                <button id="modalCopyBtn" type="button" class="inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium text-sm transition">
+                    <i class="fa-regular fa-copy"></i>
+                    <span>Salin Link</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-40 glass-header bg-white/85 dark:bg-slate-950/85 border-b border-slate-200/80 dark:border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/30 group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-bolt-lightning text-lg"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-display font-extrabold text-xl tracking-tight bg-gradient-to-r from-brand-600 via-indigo-600 to-cyan-500 dark:from-brand-400 dark:via-indigo-300 dark:to-cyan-400 bg-clip-text text-transparent">GEN KEREN</span>
+                        <span class="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300/50">AI EduTech</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">SDN 011 Balikpapan Tengah</p>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-slate-600 dark:text-slate-300">
+                <a href="#beranda" class="hover:text-brand-600 dark:hover:text-brand-400 transition">Beranda</a>
+                <a href="#katalog" class="hover:text-brand-600 dark:hover:text-brand-400 transition">12 Generator</a>
+                <a href="#alur-kerja" class="hover:text-brand-600 dark:hover:text-brand-400 transition">Alur Administrasi</a>
+                <a href="#kreator" class="hover:text-brand-600 dark:hover:text-brand-400 transition">Profil Inovator</a>
+            </nav>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2.5">
+                <!-- Theme Toggle -->
+                <button id="themeToggle" onclick="toggleDarkMode()" class="w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="Ganti Tema Tampilan" title="Ganti Mode Terang/Gelap">
+                    <i id="themeIcon" class="fa-solid fa-moon"></i>
+                </button>
+
+                <!-- Contact Creator Button -->
+                <a href="https://wa.me/6281351767574?text=Halo%20Bapak%20Abdul%20Rahmat%2C%20saya%20menggunakan%20aplikasi%20GEN%20KEREN%20dan%20ingin%20bertanya%2Fberdiskusi." target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-md shadow-emerald-600/20 transition">
+                    <i class="fa-brands fa-whatsapp text-base"></i>
+                    <span>Hubungi Kreator</span>
+                </a>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="md:hidden w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="Buka Menu">
+                    <i id="mobileMenuIcon" class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobileMenu" class="hidden md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pt-3 pb-5 space-y-2">
+            <a href="#beranda" onclick="toggleMobileMenu()" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">Beranda</a>
+            <a href="#katalog" onclick="toggleMobileMenu()" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">Katalog 12 Generator</a>
+            <a href="#alur-kerja" onclick="toggleMobileMenu()" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">Alur Administrasi Guru</a>
+            <a href="#kreator" onclick="toggleMobileMenu()" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">Profil Inovator</a>
+            <div class="pt-2">
+                <a href="https://wa.me/6281351767574?text=Halo%20Bapak%20Abdul%20Rahmat%2C%20saya%20tertarik%20dengan%20aplikasi%20GEN%20KEREN." target="_blank" rel="noopener noreferrer" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-md">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <span>Chat WhatsApp (081351767574)</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="beranda" class="relative overflow-hidden pt-10 pb-16 sm:pt-16 sm:pb-24">
+        <!-- Decorative Background Blobs -->
+        <div class="absolute -top-24 -left-24 w-96 h-96 bg-brand-500/15 dark:bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute top-1/3 -right-24 w-96 h-96 bg-cyan-500/15 dark:bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+                <!-- Left Column: Hero Text -->
+                <div class="lg:col-span-7 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-50 dark:bg-brand-950/80 border border-brand-200 dark:border-brand-800 text-brand-700 dark:text-brand-300 text-xs sm:text-sm font-semibold mb-6 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-brand-600 animate-ping"></span>
+                        <span>Inovasi Administrasi Pembelajaran Otomatis</span>
+                    </div>
+
+                    <h1 class="font-display font-extrabold text-3xl sm:text-5xl lg:text-6xl tracking-tight text-slate-900 dark:text-white leading-[1.15] mb-6">
+                        Tuntaskan Administrasi Guru Bersama <span class="bg-gradient-to-r from-brand-600 via-indigo-600 to-cyan-500 dark:from-brand-400 dark:via-indigo-300 dark:to-cyan-400 bg-clip-text text-transparent">GEN KEREN</span>
+                    </h1>
+
+                    <p class="text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto lg:mx-0 mb-8">
+                        Platform terpadu berisi <strong>12 Generator Cerdas Berbasis AI</strong> untuk membantu pendidik menyusun dokumen KOSP, RME (Rencana Minggu Efektif), ATP, Prota/Prosem, RPP Mendalam, STEM, LKPD, Asesmen HOTS, hingga Olah Nilai Rapor secara cepat, sistematis, dan bermutu.
+                    </p>
+
+                    <!-- Creator Mini Attribution Badge -->
+                    <div class="inline-flex flex-wrap items-center justify-center lg:justify-start gap-3.5 p-3 pr-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm mb-8">
+                        <img 
+                            src="https://i.imgur.com/YbvvB0o.jpeg" 
+                            alt="Abdul Rahmat, S.Pd" 
+                            referrerpolicy="no-referrer"
+                            onerror="this.onerror=null;this.src='https://placehold.co/100x100/4f46e5/ffffff?text=AR';"
+                            class="w-12 h-12 rounded-xl object-cover object-top border-2 border-brand-500 shadow-sm"
+                        >
+                        <div class="text-left">
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Dikembangkan oleh Inovator Pendidikan:</p>
+                            <p class="text-sm font-bold text-slate-900 dark:text-white">Abdul Rahmat, S.Pd <span class="font-normal text-slate-500 dark:text-slate-400">• SD Negeri 011 Balikpapan Tengah</span></p>
+                        </div>
+                    </div>
+
+                    <!-- CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5">
+                        <a href="#katalog" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-base shadow-xl shadow-brand-600/25 hover:-translate-y-0.5 transition">
+                            <i class="fa-solid fa-rocket"></i>
+                            <span>Mulai Gunakan Generator</span>
+                        </a>
+                        <a href="#alur-kerja" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 font-semibold text-base transition">
+                            <i class="fa-solid fa-route text-brand-500"></i>
+                            <span>Lihat Urutan Penyusunan</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right Column: Visual Interactive Showcase Card -->
+                <div class="lg:col-span-5">
+                    <div class="relative mx-auto max-w-md lg:max-w-none">
+                        <!-- Main Dashboard Preview Card -->
+                        <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 sm:p-7 shadow-2xl relative z-10">
+                            <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100 dark:border-slate-800">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                                    <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                                    <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                                    <span class="ml-2 text-xs font-semibold text-slate-400">Ekosistem GEN KEREN</span>
+                                </div>
+                                <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400">12 Aplikasi Aktif</span>
+                            </div>
+
+                            <!-- 3 Pillar Preview -->
+                            <div class="space-y-3.5">
+                                <div onclick="filterByCategory('perencanaan'); document.getElementById('katalog').scrollIntoView({behavior: 'smooth'});" class="cursor-pointer group p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 hover:bg-brand-50 dark:hover:bg-brand-950/50 border border-slate-200/60 dark:border-slate-700/60 transition flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-lg shrink-0 shadow-md shadow-blue-600/20 group-hover:scale-105 transition">
+                                        <i class="fa-solid fa-compass-drafting"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between">
+                                            <h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition">1. Perencanaan Kurikulum</h3>
+                                            <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">5 Alat</span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">KOSP, RME, ATP, Prota Prosem & KKTP Otomatis</p>
+                                    </div>
+                                </div>
+
+                                <div onclick="filterByCategory('perangkat'); document.getElementById('katalog').scrollIntoView({behavior: 'smooth'});" class="cursor-pointer group p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 hover:bg-brand-50 dark:hover:bg-brand-950/50 border border-slate-200/60 dark:border-slate-700/60 transition flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-lg shrink-0 shadow-md shadow-purple-600/20 group-hover:scale-105 transition">
+                                        <i class="fa-solid fa-book-open-reader"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between">
+                                            <h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition">2. RPP & Perangkat Ajar</h3>
+                                            <span class="text-xs font-semibold text-purple-600 dark:text-purple-400">4 Alat</span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">RPP Mendalam, STEM, Kokurikuler & LKPD</p>
+                                    </div>
+                                </div>
+
+                                <div onclick="filterByCategory('evaluasi'); document.getElementById('katalog').scrollIntoView({behavior: 'smooth'});" class="cursor-pointer group p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 hover:bg-brand-50 dark:hover:bg-brand-950/50 border border-slate-200/60 dark:border-slate-700/60 transition flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-lg shrink-0 shadow-md shadow-emerald-600/20 group-hover:scale-105 transition">
+                                        <i class="fa-solid fa-chart-pie"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between">
+                                            <h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition">3. Asesmen, Jurnal & Rapor</h3>
+                                            <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">3 Alat</span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">Asesmen HOTS, Jurnal KBM & Olah Nilai Rapor</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Highlight Footer inside Card -->
+                            <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 grid grid-cols-3 gap-2 text-center">
+                                <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/40">
+                                    <p class="font-display font-extrabold text-lg sm:text-xl text-brand-600 dark:text-brand-400">12+</p>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Generator AI</p>
+                                </div>
+                                <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/40">
+                                    <p class="font-display font-extrabold text-lg sm:text-xl text-emerald-600 dark:text-emerald-400">90%</p>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Hemat Waktu</p>
+                                </div>
+                                <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/40">
+                                    <p class="font-display font-extrabold text-lg sm:text-xl text-amber-600 dark:text-amber-400">24/7</p>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Akses Mudah</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Catalog Section: 12 Generators -->
+    <section id="katalog" class="py-16 bg-white dark:bg-slate-900/60 border-y border-slate-200/80 dark:border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto mb-10">
+                <span class="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300">Katalog Aplikasi Lengkap</span>
+                <h2 class="font-display font-extrabold text-2xl sm:text-4xl text-slate-900 dark:text-white mt-3 mb-3">
+                    Pilih Generator Administrasi Pembelajaran
+                </h2>
+                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base">
+                    Klik tombol <strong>"Buka Aplikasi"</strong> pada masing-masing kartu di bawah ini untuk langsung membuat dokumen pembelajaran secara otomatis.
+                </p>
+            </div>
+
+            <!-- Search & Category Filter Bar -->
+            <div class="bg-slate-50 dark:bg-slate-900 p-4 sm:p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 mb-8 shadow-sm">
+                <div class="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
+                    <!-- Category Pills -->
+                    <div class="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 no-scrollbar" id="categoryButtons">
+                        <button onclick="filterByCategory('semua')" data-cat="semua" class="cat-btn active-cat shrink-0 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 bg-brand-600 text-white shadow-md shadow-brand-600/20">
+                            <i class="fa-solid fa-layer-group"></i>
+                            <span>Semua (12)</span>
+                        </button>
+                        <button onclick="filterByCategory('perencanaan')" data-cat="perencanaan" class="cat-btn shrink-0 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-400">
+                            <i class="fa-solid fa-compass-drafting text-blue-500"></i>
+                            <span>Perencanaan (5)</span>
+                        </button>
+                        <button onclick="filterByCategory('perangkat')" data-cat="perangkat" class="cat-btn shrink-0 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-400">
+                            <i class="fa-solid fa-book-open-reader text-purple-500"></i>
+                            <span>RPP & Modul (4)</span>
+                        </button>
+                        <button onclick="filterByCategory('evaluasi')" data-cat="evaluasi" class="cat-btn shrink-0 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-400">
+                            <i class="fa-solid fa-chart-line text-emerald-500"></i>
+                            <span>Asesmen & Rapor (3)</span>
+                        </button>
+                        <button onclick="filterByCategory('favorit')" data-cat="favorit" class="cat-btn shrink-0 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-400">
+                            <i class="fa-solid fa-star text-amber-500"></i>
+                            <span>Favorit <span id="favCountBadge" class="ml-0.5 px-1.5 py-0.2 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 text-xs">0</span></span>
+                        </button>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="relative w-full lg:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input
+                            id="searchInput"
+                            type="text"
+                            oninput="handleSearch(this.value)"
+                            placeholder="Cari RPP, ATP, LKPD, Rapor..."
+                            class="w-full pl-10 pr-9 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition"
+                        >
+                        <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cards Grid Container -->
+            <div id="generatorGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Populated dynamically by JavaScript -->
+            </div>
+
+            <!-- Empty State when search/filter returns no result -->
+            <div id="emptyState" class="hidden text-center py-14 px-4 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-800">
+                <div class="w-16 h-16 rounded-2xl bg-slate-200/70 dark:bg-slate-800 text-slate-500 mx-auto flex items-center justify-center text-2xl mb-4">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <h3 class="font-display font-bold text-lg text-slate-800 dark:text-slate-200 mb-1">Tidak Ada Generator Ditemukan</h3>
+                <p id="emptyStateMsg" class="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-5">
+                    Coba gunakan kata kunci pencarian lain atau tampilkan kembali seluruh kategori aplikasi.
+                </p>
+                <button onclick="resetFilters()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold transition">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>Tampilkan Semua Generator</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recommended Teacher Workflow Section -->
+    <section id="alur-kerja" class="py-16 sm:py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">Panduan Sistematis</span>
+                <h2 class="font-display font-extrabold text-2xl sm:text-4xl text-slate-900 dark:text-white mt-3 mb-3">
+                    Alur Cerdas Penyusunan Administrasi Guru
+                </h2>
+                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base">
+                    Bingung mulai dari mana? Ikuti tahapan penyusunan administrasi pembelajaran dari awal semester hingga pengolahan nilai rapor berikut ini.
+                </p>
+            </div>
+
+            <!-- 4-Stage Roadmap -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Tahap 1 -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm relative flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">Tahap 01</span>
+                            <i class="fa-solid fa-sitemap text-blue-500 text-xl"></i>
+                        </div>
+                        <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white mb-2">Pondasi & Perencanaan</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                            Awali semester dengan menyusun KOSP, menghitung Rencana Minggu Efektif (RME), serta memetakan ATP dan Prota/Prosem.
+                        </p>
+                    </div>
+                    <div class="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                        <a href="https://gemini.google.com/share/e51ee6959693" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-xs font-semibold text-slate-700 dark:text-slate-200 transition">
+                            <span>1. Generator KOSP</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-blue-500"></i>
+                        </a>
+                        <a href="https://gemini.google.com/share/de291f01282b?skid=c3e2dc2f-c600-4857-b452-491f3e99a4ed" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-xs font-semibold text-slate-700 dark:text-slate-200 transition">
+                            <span>2. Generator RME (Minggu Efektif)</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-blue-500"></i>
+                        </a>
+                        <a href="https://gemini.google.com/share/986387f59f61" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-xs font-semibold text-slate-700 dark:text-slate-200 transition">
+                            <span>3. Generator ATP & Prota Prosem</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-blue-500"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tahap 2 -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm relative flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300">Tahap 02</span>
+                            <i class="fa-solid fa-chalkboard-user text-purple-500 text-xl"></i>
+                        </div>
+                        <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white mb-2">Desain RPP & Modul</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                            Tetapkan kriteria ketercapaian (KKTP) lalu susun skenario pembelajaran mendalam, berbasis STEM, maupun kokurikuler.
+                        </p>
+                    </div>
+                    <div class="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                        <a href="https://gemini.google.com/share/09f46f5a37d0" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-purple-50 dark:hover:bg-purple-950/50 text-xs font-semibold text-slate-700 dark:text-slate-200 transition">
+                            <span>4. Generator KKTP</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-purple-500"></i>
+                        </a>
+                        <a href="https://share.gemini.google/a3z7VYqQa2Qh" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-purple-50 dark:hover:bg-purple-950/50 text-xs font-semibold text-slate-700 dark:text-slate-200 transition">
+                            <span>5. RPP Mendalam / STEM</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-purple-500"></i>
+                        </a>
+                        <a href="https://gemini.google.com/share/b84001d86518" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-purple-50 dark:hover:bg-purple-950/50 text-xs font-semibold text-slate-700 dark:text-slate-200 transition">
+                            <span>6. RPP Kokurikuler Otomatis</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-purple-500"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tahap 3 -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm relative flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">Tahap 03</span>
+                            <i class="fa-solid fa-file-pen text-amber-500 text-xl"></i>
+                        </div>
+                        <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white mb-2">Pelaksanaan & Aktivitas</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                            Siapkan Lembar Kerja Peserta Didik (LKPD) yang interaktif dan dokumentasikan kegiatan harian di Jurnal KBM.
+                        </p>
+                    </div>
+                    <div class="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                        <a href="https://share.gemini.google/NYg81hoDCbS4" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-amber-50 dark:hover:bg-amber-950/50 text-xs font-semibold text-slate-700 dark:text-slate-200 transition">
+                            <span>7. Generator LKPD Otomatis</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-amber-500"></i>
+                        </a>
+                        <a href="https://gemini.google.com/share/6f58e851996f" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-amber-50 dark:hover:bg-amber-950/50 text-xs font-semibold text-slate-700 dark:text-slate-200 transition">
+                            <span>8. Generator Jurnal KBM</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-amber-500"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tahap 4 -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm relative flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">Tahap 04</span>
+                            <i class="fa-solid fa-award text-emerald-500 text-xl"></i>
+                        </div>
+                        <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white mb-2">Evaluasi & Pelaporan</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                            Uji pemahaman siswa menggunakan soal-soal berorientasi HOTS dan olah nilai akhir secara akurat menjadi rapor.
+                        </p>
+                    </div>
+                    <div class="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                        <a href="https://gemini.google.com/share/5bd6038fc497" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 text-xs font-semibold text-slate-700 dark:text-slate-200 transition">
+                            <span>9. Generator Asesmen HOTS</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-emerald-500"></i>
+                        </a>
+                        <a href="https://gemini.google.com/share/a56cb3714d85" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 text-xs font-semibold text-slate-700 dark:text-slate-200 transition">
+                            <span>10. Generator Olah Nilai Rapor</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-emerald-500"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Creator / Innovator Spotlight Section -->
+    <section id="kreator" class="py-16 bg-gradient-to-br from-brand-900 via-slate-900 to-indigo-950 text-white relative overflow-hidden">
+        <!-- Decorative SVG grid pattern -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 28px 28px;"></div>
+
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-3xl p-6 sm:p-10 lg:p-12 shadow-2xl">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <!-- Avatar / Badge Column -->
+                    <div class="lg:col-span-4 flex flex-col items-center text-center">
+                        <div class="w-36 h-36 sm:w-44 sm:h-44 rounded-3xl bg-gradient-to-tr from-amber-400 via-orange-500 to-rose-500 p-1.5 shadow-2xl mb-5 relative group">
+                            <img 
+                                src="https://i.imgur.com/YbvvB0o.jpeg" 
+                                alt="Foto Abdul Rahmat, S.Pd - Kreator GEN KEREN" 
+                                referrerpolicy="no-referrer"
+                                onerror="this.onerror=null;this.src='https://placehold.co/300x300/1e293b/fbbf24?text=Abdul+Rahmat';"
+                                class="w-full h-full rounded-[20px] object-cover object-top shadow-inner group-hover:scale-[1.02] transition-transform duration-300"
+                            >
+                            <div class="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-lg border-2 border-slate-900" title="Inovator Pendidikan Terverifikasi">
+                                <i class="fa-solid fa-check text-sm"></i>
+                            </div>
+                        </div>
+                        <span class="px-3.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-semibold mb-2">
+                            Kreator & Inovator GEN KEREN
+                        </span>
+                        <h3 class="font-display font-extrabold text-2xl text-white">Abdul Rahmat, S.Pd</h3>
+                        <p class="text-sm text-indigo-200 font-medium mt-1">SD Negeri 011 Balikpapan Tengah</p>
+                    </div>
+
+                    <!-- Bio & Contact Info Column -->
+                    <div class="lg:col-span-8 text-center lg:text-left">
+                        <div class="inline-flex items-center gap-2 text-amber-300 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-3">
+                            <i class="fa-solid fa-quote-left"></i>
+                            <span>Dedikasi untuk Kemajuan Pendidikan Indonesia</span>
+                        </div>
+                        <h2 class="font-display font-bold text-2xl sm:text-3xl text-white leading-snug mb-4">
+                            "Mempermudah Administrasi Guru agar Energi Terbaik Tercurah Sepenuhnya bagi Murid di Kelas."
+                        </h2>
+                        <p class="text-indigo-100/90 text-sm sm:text-base leading-relaxed mb-6">
+                            <strong>GEN KEREN</strong> lahir dari kebutuhan nyata para pendidik akan perangkat administrasi pembelajaran yang cepat, akurat, dan relevan dengan perkembangan kurikulum terkini. Melalui 12 generator otomatis ini, diharapkan beban administratif guru berkurang drastis sehingga kualitas interaksi pembelajaran bersama peserta didik semakin optimal.
+                        </p>
+
+                        <!-- Contact Details Cards -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-left">
+                            <div class="p-4 rounded-2xl bg-white/10 border border-white/10 flex items-center gap-3.5">
+                                <div class="w-11 h-11 rounded-xl bg-brand-500/30 text-brand-200 flex items-center justify-center text-lg shrink-0">
+                                    <i class="fa-solid fa-school"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-indigo-200">Instansi / Satuan Pendidikan</p>
+                                    <p class="text-sm font-bold text-white">SD Negeri 011 Balikpapan Tengah</p>
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-3.5">
+                                    <div class="w-11 h-11 rounded-xl bg-emerald-500/30 text-emerald-200 flex items-center justify-center text-lg shrink-0">
+                                        <i class="fa-solid fa-phone-volume"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-indigo-200">No. Telepon / WhatsApp</p>
+                                        <p class="text-sm font-bold text-white">081351767574</p>
+                                    </div>
+                                </div>
+                                <button onclick="copyTextToClipboard('081351767574', 'Nomor telepon berhasil disalin!')" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-semibold text-white transition" title="Salin Nomor Telepon">
+                                    Salin
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Direct Action Buttons -->
+                        <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+                            <a href="https://wa.me/6281351767574?text=Halo%20Bapak%20Abdul%20Rahmat%2C%20terima%20kasih%20atas%20inovasi%20aplikasi%20GEN%20KEREN." target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm shadow-lg shadow-emerald-500/25 transition">
+                                <i class="fa-brands fa-whatsapp text-base"></i>
+                                <span>Hubungi via WhatsApp</span>
+                            </a>
+                            <button onclick="copyAllLinks()" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-sm border border-white/20 transition">
+                                <i class="fa-solid fa-share-nodes"></i>
+                                <span>Salin Daftar Semua Link Aplikasi</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-950 border-t border-slate-200/80 dark:border-slate-800/80 py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center text-white text-sm">
+                    <i class="fa-solid fa-bolt-lightning"></i>
+                </div>
+                <div>
+                    <p class="font-display font-bold text-sm text-slate-900 dark:text-white">GEN KEREN — Administrasi Pembelajaran Otomatis</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Karya Abdul Rahmat, S.Pd • SD Negeri 011 Balikpapan Tengah (Telp. 081351767574)</p>
+                </div>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+                &copy; <span id="currentYear"></span> GEN KEREN. Dibuat untuk memajukan pendidikan Indonesia.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Application Logic & Data -->
+    <script>
+        // Complete Data of the 12 Generators provided by Abdul Rahmat, S.Pd
+        const generatorsData = [
+            {
+                id: 'kosp',
+                step: '01',
+                title: 'Generator KOSP Otomatis',
+                category: 'perencanaan',
+                categoryLabel: 'Perencanaan Kurikulum',
+                url: 'https://gemini.google.com/share/e51ee6959693',
+                icon: 'fa-solid fa-building-columns',
+                colorClass: 'from-blue-600 to-indigo-600',
+                badgeBg: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+                description: 'Menyusun dokumen Kurikulum Operasional Satuan Pendidikan (KOSP) yang terstruktur sesuai karakteristik sekolah dan kebutuhan peserta didik.',
+                features: [
+                    'Analisis karakteristik satuan pendidikan otomatis',
+                    'Perumusan Visi, Misi, dan Tujuan Sekolah yang selaras',
+                    'Pengorganisasian pembelajaran & rencana pendampingan'
+                ]
+            },
+            {
+                id: 'rme',
+                step: '02',
+                title: 'Generator RME Otomatis',
+                category: 'perencanaan',
+                categoryLabel: 'Perencanaan Kurikulum',
+                url: 'https://gemini.google.com/share/de291f01282b?skid=c3e2dc2f-c600-4857-b452-491f3e99a4ed',
+                icon: 'fa-solid fa-calendar-days',
+                colorClass: 'from-blue-500 to-cyan-600',
+                badgeBg: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+                description: 'Menghitung dan menyusun Rencana Minggu Efektif (RME) dalam satu semester atau tahun pelajaran secara akurat sesuai kalender pendidikan.',
+                features: [
+                    'Perhitungan otomatis minggu efektif dan minggu tidak efektif',
+                    'Distribusi alokasi jam pelajaran berdasarkan kalender pendidikan',
+                    'Menjadi acuan akurat dalam penyusunan Prota dan Prosem'
+                ]
+            },
+            {
+                id: 'atp',
+                step: '03',
+                title: 'Generator ATP Otomatis',
+                category: 'perencanaan',
+                categoryLabel: 'Perencanaan Kurikulum',
+                url: 'https://gemini.google.com/share/986387f59f61',
+                icon: 'fa-solid fa-route',
+                colorClass: 'from-sky-500 to-blue-600',
+                badgeBg: 'bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300',
+                description: 'Mengurai Capaian Pembelajaran (CP) menjadi Alur Tujuan Pembelajaran (ATP) yang runtut, logis, dan sesuai fase perkembangan peserta didik.',
+                features: [
+                    'Pemetaan elemen Capaian Pembelajaran secara presisi',
+                    'Rumusan Tujuan Pembelajaran (Kompetensi & Lingkup Materi)',
+                    'Dilengkapi estimasi alokasi jam pelajaran & profil lulusan'
+                ]
+            },
+            {
+                id: 'kktp',
+                step: '04',
+                title: 'Generator KKTP Otomatis',
+                category: 'perencanaan',
+                categoryLabel: 'Perencanaan Kurikulum',
+                url: 'https://gemini.google.com/share/09f46f5a37d0',
+                icon: 'fa-solid fa-bullseye',
+                colorClass: 'from-indigo-600 to-blue-700',
+                badgeBg: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300',
+                description: 'Membuat Kriteria Ketercapaian Tujuan Pembelajaran (KKTP) lengkap menggunakan pendekatan rubrik, deskripsi kriteria, atau interval nilai.',
+                features: [
+                    'Pilihan rubrik ketercapaian dari Baru Berkembang hingga Mahir',
+                    'Indikator asesmen yang terukur dan objektif',
+                    'Rekomendasi tindak lanjut remedial & pengayaan'
+                ]
+            },
+            {
+                id: 'prota-prosem',
+                step: '05',
+                title: 'Generator Prota Prosem Otomatis',
+                category: 'perencanaan',
+                categoryLabel: 'Perencanaan Kurikulum',
+                url: 'https://gemini.google.com/share/d4677ba0921b',
+                icon: 'fa-solid fa-calendar-check',
+                colorClass: 'from-cyan-600 to-blue-600',
+                badgeBg: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300',
+                description: 'Menyusun Program Tahunan (Prota) dan Program Semester (Prosem) secara otomatis lengkap dengan distribusi minggu efektif belajar.',
+                features: [
+                    'Perhitungan distribusi alokasi waktu semester ganjil & genap',
+                    'Sinkron dengan Tujuan Pembelajaran pada ATP',
+                    'Format tabel rapi siap cetak untuk pemberkasan guru'
+                ]
+            },
+            {
+                id: 'lkpd',
+                step: '06',
+                title: 'Generator LKPD Otomatis',
+                category: 'perangkat',
+                categoryLabel: 'RPP & Perangkat Ajar',
+                url: 'https://share.gemini.google/NYg81hoDCbS4',
+                icon: 'fa-solid fa-file-signature',
+                colorClass: 'from-fuchsia-600 to-pink-600',
+                badgeBg: 'bg-pink-100 text-pink-700 dark:bg-pink-950 dark:text-pink-300',
+                description: 'Menghasilkan Lembar Kerja Peserta Didik (LKPD) yang menarik, eksploratif, dan mendorong kolaborasi aktif siswa di dalam kelas.',
+                features: [
+                    'Petunjuk belajar jelas & aktivitas eksplorasi bertahap',
+                    'Pertanyaan pemantik diskusi kelompok maupun individu',
+                    'Rubrik penilaian aktivitas lembar kerja terintegrasi'
+                ]
+            },
+            {
+                id: 'rpp-mendalam',
+                step: '07',
+                title: 'Generator RPP Mendalam Otomatis',
+                category: 'perangkat',
+                categoryLabel: 'RPP & Perangkat Ajar',
+                url: 'https://share.gemini.google/a3z7VYqQa2Qh',
+                icon: 'fa-solid fa-brain',
+                colorClass: 'from-purple-600 to-indigo-600',
+                badgeBg: 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
+                description: 'Merancang RPP / Modul Ajar berorientasi Pembelajaran Mendalam (Deep Learning): Mindful, Meaningful, dan Joyful Learning.',
+                features: [
+                    'Integrasi prinsip Berkesadaran, Bermakna, dan Menggembirakan',
+                    'Langkah kegiatan pendahuluan, inti, dan refleksi mendalam',
+                    'Mendukung diferensiasi kebutuhan belajar peserta didik'
+                ]
+            },
+            {
+                id: 'asesmen-hots',
+                step: '08',
+                title: 'Generator Asesmen HOTS',
+                category: 'evaluasi',
+                categoryLabel: 'Asesmen & Rapor',
+                url: 'https://gemini.google.com/share/5bd6038fc497',
+                icon: 'fa-solid fa-lightbulb',
+                colorClass: 'from-amber-500 to-orange-600',
+                badgeBg: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
+                description: 'Membuat instrumen soal Asesmen Berpikir Tingkat Tinggi (HOTS - Level C4, C5, C6) lengkap dengan kisi-kisi, stimulus, dan kunci jawaban.',
+                features: [
+                    'Dilengkapi bacaan/kasus stimulus yang kontekstual & literat',
+                    'Kisi-kisi soal, level kognitif, dan pembahasan lengkap',
+                    'Mendukung format Pilihan Ganda, PG Kompleks, dan Uraian'
+                ]
+            },
+            {
+                id: 'rpp-kokurikuler',
+                step: '09',
+                title: 'Generator RPP Kokurikuler Otomatis',
+                category: 'perangkat',
+                categoryLabel: 'RPP & Perangkat Ajar',
+                url: 'https://gemini.google.com/share/b84001d86518',
+                icon: 'fa-solid fa-people-group',
+                colorClass: 'from-rose-500 to-pink-600',
+                badgeBg: 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300',
+                description: 'Menyusun rencana pembelajaran kegiatan kokurikuler dan projek penguatan karakter siswa melalui aktivitas lintas disiplin ilmu.',
+                features: [
+                    'Penguatan karakter dan dimensi profil lulusan',
+                    'Desain aktivitas kolaboratif berbasis projek nyata',
+                    'Instrumen observasi dan refleksi tindak lanjut peserta didik'
+                ]
+            },
+            {
+                id: 'rpp-stem',
+                step: '10',
+                title: 'Generator RPP STEM Otomatis',
+                category: 'perangkat',
+                categoryLabel: 'RPP & Perangkat Ajar',
+                url: 'https://share.gemini.google/tKqTYfq7MBZ4',
+                icon: 'fa-solid fa-atom',
+                colorClass: 'from-teal-500 to-emerald-600',
+                badgeBg: 'bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300',
+                description: 'Merancang RPP berbasis STEM (Science, Technology, Engineering, and Mathematics) untuk melatih inovasi serta rekayasa pemecahan masalah.',
+                features: [
+                    'Integrasi utuh aspek Sains, Teknologi, Teknik, dan Matematika',
+                    'Alur Engineering Design Process (EDP) yang aplikatif',
+                    'Mendorong kreativitas eksperimen dan pembuatan karya'
+                ]
+            },
+            {
+                id: 'jurnal-kbm',
+                step: '11',
+                title: 'Generator Jurnal KBM Otomatis',
+                category: 'evaluasi',
+                categoryLabel: 'Asesmen & Rapor',
+                url: 'https://gemini.google.com/share/6f58e851996f',
+                icon: 'fa-solid fa-book-bookmark',
+                colorClass: 'from-emerald-600 to-green-600',
+                badgeBg: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
+                description: 'Mencatat dan menyusun laporan Jurnal Kegiatan Belajar Mengajar (KBM) harian guru secara rapi, lengkap dengan catatan refleksi kelas.',
+                features: [
+                    'Rekapitulasi materi, ketercapaian, dan kehadiran siswa',
+                    'Catatan kejadian khusus & tindak lanjut pembinaan',
+                    'Siap diunduh atau dicetak sebagai bukti kinerja harian'
+                ]
+            },
+            {
+                id: 'olah-nilai-rapor',
+                step: '12',
+                title: 'Generator Olah Nilai Rapor',
+                category: 'evaluasi',
+                categoryLabel: 'Asesmen & Rapor',
+                url: 'https://gemini.google.com/share/a56cb3714d85',
+                icon: 'fa-solid fa-chart-column',
+                colorClass: 'from-green-600 to-teal-600',
+                badgeBg: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',
+                description: 'Mengolah nilai asesmen formatif dan sumatif secara otomatis serta menyusun deskripsi capaian kompetensi rapor yang personal dan akurat.',
+                features: [
+                    'Kalkulasi nilai akhir dari asesmen formatif & sumatif',
+                    'Generator deskripsi capaian tertinggi dan capaian terendah otomatis',
+                    'Mempercepat pengisian e-Rapor tanpa pusing merangkai kalimat'
+                ]
+            }
+        ];
+
+        // State Variables
+        let activeCategory = 'semua';
+        let searchQuery = '';
+        let favorites = [];
+
+        // Load favorites from localStorage safely
+        try {
+            const savedFavs = localStorage.getItem('gen_keren_favorites');
+            if (savedFavs) {
+                favorites = JSON.parse(savedFavs);
+            }
+        } catch (e) {
+            favorites = [];
+        }
+
+        // Render Cards Function
+        function renderGenerators() {
+            const grid = document.getElementById('generatorGrid');
+            const emptyState = document.getElementById('emptyState');
+            const emptyStateMsg = document.getElementById('emptyStateMsg');
+            const favBadge = document.getElementById('favCountBadge');
+
+            favBadge.textContent = favorites.length;
+
+            const filtered = generatorsData.filter(item => {
+                const matchesCategory =
+                    activeCategory === 'semua' ||
+                    (activeCategory === 'favorit' ? favorites.includes(item.id) : item.category === activeCategory);
+
+                const query = searchQuery.trim().toLowerCase();
+                const matchesSearch =
+                    !query ||
+                    item.title.toLowerCase().includes(query) ||
+                    item.description.toLowerCase().includes(query) ||
+                    item.categoryLabel.toLowerCase().includes(query);
+
+                return matchesCategory && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                if (activeCategory === 'favorit' && favorites.length === 0) {
+                    emptyStateMsg.textContent = 'Anda belum menandai aplikasi favorit. Klik ikon bintang pada kartu aplikasi untuk menyimpannya di sini.';
+                } else {
+                    emptyStateMsg.textContent = 'Tidak ditemukan generator yang cocok dengan pencarian Anda. Coba kata kunci lain.';
+                }
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            grid.innerHTML = filtered.map(item => {
+                const isFav = favorites.includes(item.id);
+                return `
+                <article class="card-hover bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 shadow-sm hover:shadow-xl flex flex-col justify-between relative group">
+                    <div>
+                        <!-- Top Row: Icon, Category Badge & Favorite Star -->
+                        <div class="flex items-start justify-between gap-3 mb-5">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-13 h-13 w-12 h-12 rounded-2xl bg-gradient-to-br ${item.colorClass} text-white flex items-center justify-center text-xl shadow-md">
+                                    <i class="${item.icon}"></i>
+                                </div>
+                                <div>
+                                    <span class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full ${item.badgeBg}">
+                                        ${item.categoryLabel}
+                                    </span>
+                                    <p class="text-xs text-slate-400 dark:text-slate-500 font-semibold mt-0.5">Modul #${item.step}</p>
+                                </div>
+                            </div>
+
+                            <button
+                                onclick="toggleFavorite('${item.id}')"
+                                class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center transition ${isFav ? 'bg-amber-50 dark:bg-amber-950/60 border-amber-300 text-amber-500' : 'text-slate-400 hover:text-amber-500 hover:bg-slate-50 dark:hover:bg-slate-800'}"
+                                title="${isFav ? 'Hapus dari Favorit' : 'Simpan ke Favorit'}"
+                                aria-label="Simpan ke Favorit"
+                            >
+                                <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-star text-sm"></i>
+                            </button>
+                        </div>
+
+                        <!-- Title & Description -->
+                        <h3 class="font-display font-bold text-lg sm:text-xl text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition mb-2">
+                            ${item.title}
+                        </h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6">
+                            ${item.description}
+                        </p>
+                    </div>
+
+                    <!-- Card Footer Actions -->
+                    <div class="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center gap-2">
+                        <a
+                            href="${item.url}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs sm:text-sm shadow-md shadow-brand-600/20 transition"
+                        >
+                            <span>Buka Aplikasi</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                        </a>
+
+                        <button
+                            onclick="copyTextToClipboard('${item.url}', 'Link ${item.title} berhasil disalin!')"
+                            class="w-11 h-11 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center transition"
+                            title="Salin Link Aplikasi"
+                            aria-label="Salin Link Aplikasi"
+                        >
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+
+                        <button
+                            onclick="openModal('${item.id}')"
+                            class="w-11 h-11 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center transition"
+                            title="Lihat Detail & Manfaat"
+                            aria-label="Lihat Detail"
+                        >
+                            <i class="fa-solid fa-circle-info"></i>
+                        </button>
+                    </div>
+                </article>
+                `;
+            }).join('');
+        }
+
+        // Filter by Category
+        function filterByCategory(category) {
+            activeCategory = category;
+            const buttons = document.querySelectorAll('.cat-btn');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('data-cat') === category) {
+                    btn.className = 'cat-btn shrink-0 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 bg-brand-600 text-white shadow-md shadow-brand-600/20';
+                } else {
+                    btn.className = 'cat-btn shrink-0 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-400';
+                }
+            });
+            renderGenerators();
+        }
+
+        // Search Handler
+        function handleSearch(val) {
+            searchQuery = val;
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if (val.trim().length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+            renderGenerators();
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('searchInput');
+            input.value = '';
+            handleSearch('');
+            input.focus();
+        }
+
+        function resetFilters() {
+            clearSearch();
+            filterByCategory('semua');
+        }
+
+        // Favorite Toggle
+        function toggleFavorite(id) {
+            const index = favorites.indexOf(id);
+            const item = generatorsData.find(g => g.id === id);
+            if (index > -1) {
+                favorites.splice(index, 1);
+                showToast(`${item.title} dihapus dari favorit`, 'info');
+            } else {
+                favorites.push(id);
+                showToast(`${item.title} disimpan ke favorit!`, 'success');
+            }
+            try {
+                localStorage.setItem('gen_keren_favorites', JSON.stringify(favorites));
+            } catch (e) {}
+            renderGenerators();
+        }
+
+        // Modal Detail Functions
+        function openModal(id) {
+            const item = generatorsData.find(g => g.id === id);
+            if (!item) return;
+
+            document.getElementById('modalCategory').textContent = item.categoryLabel;
+            document.getElementById('modalTitle').textContent = item.title;
+            document.getElementById('modalDesc').textContent = item.description;
+            document.getElementById('modalIcon').className = item.icon;
+            document.getElementById('modalIconBox').className = `w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl shadow-md bg-gradient-to-br ${item.colorClass}`;
+
+            const featuresList = document.getElementById('modalFeatures');
+            featuresList.innerHTML = item.features.map(f => `
+                <li class="flex items-start gap-2.5">
+                    <i class="fa-solid fa-circle-check text-emerald-500 mt-1 text-xs"></i>
+                    <span>${f}</span>
+                </li>
+            `).join('');
+
+            const openBtn = document.getElementById('modalOpenBtn');
+            openBtn.href = item.url;
+
+            const copyBtn = document.getElementById('modalCopyBtn');
+            copyBtn.onclick = () => copyTextToClipboard(item.url, `Link ${item.title} berhasil disalin!`);
+
+            const modal = document.getElementById('appModal');
+            const content = document.getElementById('appModalContent');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('appModal');
+            const content = document.getElementById('appModalContent');
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('appModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Clipboard Copy Helper (Uses document.execCommand('copy') for iframe compatibility)
+        function copyTextToClipboard(text, successMessage) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            textArea.style.top = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                showToast(successMessage || 'Teks berhasil disalin ke clipboard!', 'success');
+            } catch (err) {
+                showToast('Gagal menyalin teks secara otomatis.', 'error');
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        // Copy All 12 Links formatted nicely for WhatsApp / Teacher Group sharing
+        function copyAllLinks() {
+            const header = `*GEN KEREN - Administrasi Pembelajaran Otomatis*\nOleh: Abdul Rahmat, S.Pd (SD Negeri 011 Balikpapan Tengah)\nNo. Telp/WA: 081351767574\n\n`;
+            const body = generatorsData.map((g, idx) => `${idx + 1}. *${g.title}*\n${g.url}`).join('\n\n');
+            copyTextToClipboard(header + body, 'Daftar lengkap 12 link GEN KEREN berhasil disalin! Siap dibagikan ke grup guru.');
+        }
+
+        // Custom Toast Notification
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+
+            const iconClass = type === 'success'
+                ? 'fa-solid fa-circle-check text-emerald-400'
+                : type === 'info'
+                ? 'fa-solid fa-circle-info text-sky-400'
+                : 'fa-solid fa-triangle-exclamation text-rose-400';
+
+            toast.className = 'pointer-events-auto flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs sm:text-sm font-semibold shadow-2xl border border-slate-700 dark:border-slate-200 transform translate-y-3 opacity-0 transition-all duration-300 max-w-sm';
+            toast.innerHTML = `
+                <i class="${iconClass} text-base shrink-0"></i>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-3', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            icon.className = isDark ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon';
+            try {
+                localStorage.setItem('gen_keren_theme', isDark ? 'dark' : 'light');
+            } catch (e) {}
+        }
+
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const icon = document.getElementById('mobileMenuIcon');
+            menu.classList.toggle('hidden');
+            icon.className = menu.classList.contains('hidden') ? 'fa-solid fa-bars' : 'fa-solid fa-xmark';
+        }
+
+        // Initialization on Load
+        window.onload = function () {
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+            // Check saved theme
+            try {
+                const savedTheme = localStorage.getItem('gen_keren_theme');
+                if (savedTheme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    document.getElementById('themeIcon').className = 'fa-solid fa-sun text-amber-400';
+                }
+            } catch (e) {}
+
+            renderGenerators();
+        };
+    </script>
+</body>
+</html>
